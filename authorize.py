@@ -25,6 +25,8 @@ def authorize(data):
             case {"transaction": transaction_data}:
                 if not account:
                     output.append(_generate_single_output(account, ["account-not-initialized"]))
+                elif account["active-card"] == False:
+                    output.append(_generate_single_output(account, ["card-not-active"]))
                 elif transaction_data["amount"] <= account["available-limit"]:
                     account["available-limit"] -= transaction_data["amount"]
                     output.append(_generate_single_output(account, []))
