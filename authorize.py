@@ -7,7 +7,7 @@ def input_operation(line):
     return json.loads(line)
 
 
-def autorize(data):
+def authorize(data):
     account = {}
     output = []
     for line in data:

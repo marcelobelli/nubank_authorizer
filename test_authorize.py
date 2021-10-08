@@ -1,7 +1,7 @@
 import io
 import sys
 
-import autorize
+import authorize
 
 
 def test_input_operations(monkeypatch):
@@ -34,7 +34,7 @@ def test_input_operations(monkeypatch):
             }
         },
     ]
-    output = [autorize.input_operation(line) for line in sys.stdin]
+    output = [authorize.input_operation(line) for line in sys.stdin]
 
     assert output == expected_output
 
@@ -52,7 +52,7 @@ def test_account_already_initialized_rule():
         },
     ]
 
-    assert autorize.autorize(input) == expected_output
+    assert authorize.authorize(input) == expected_output
 
 
 def test_insufficient_limit_rule():
@@ -90,7 +90,7 @@ def test_insufficient_limit_rule():
         {"account": {"active-card": True, "available-limit": 5}, "violations": []},
     ]
 
-    assert autorize.autorize(input) == expected_output
+    assert authorize.authorize(input) == expected_output
 
 
 def test_account_not_initialized_rule():
@@ -125,4 +125,4 @@ def test_account_not_initialized_rule():
         {"account": {"active-card": True, "available-limit": 95}, "violations": []},
     ]
 
-    assert autorize.autorize(input) == expected_output
+    assert authorize.authorize(input) == expected_output
