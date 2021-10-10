@@ -1,6 +1,7 @@
 import json
 
 from copy import deepcopy
+from sliding_window import HighFrequencySlidingWindow
 
 
 def input_operation(line):
@@ -12,6 +13,7 @@ def _generate_single_output(account, violations):
 
 
 def authorize(data):
+    high_frequency = HighFrequencySlidingWindow()
     account = {}
     output = []
     for line in data:
@@ -28,8 +30,12 @@ def authorize(data):
                 elif account["active-card"] == False:
                     output.append(_generate_single_output(account, ["card-not-active"]))
                 elif transaction_data["amount"] <= account["available-limit"]:
-                    account["available-limit"] -= transaction_data["amount"]
-                    output.append(_generate_single_output(account, []))
+                    if high_frequency.process_high_frequency_small_interval_rule(transaction_data) is True:
+                        account["available-limit"] -= transaction_data["amount"]
+                        output.append(_generate_single_output(account, []))
+                    else:
+                        output.append(_generate_single_output(account, ["high-frequency-small-interval"]))
+
                 else:
                     output.append(_generate_single_output(account, ["insufficient-limit"]))
 
