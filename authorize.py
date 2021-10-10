@@ -1,7 +1,7 @@
 import json
 
 from copy import deepcopy
-from sliding_window import HighFrequencySlidingWindow
+from sliding_windows import HighFrequencySlidingWindow
 
 
 def input_operation(line):

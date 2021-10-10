@@ -36,3 +36,18 @@ class HighFrequencySlidingWindow(BaseModel):
 
         self.transactions.append(transaction)
         return True
+
+
+
+class DoubleTransactionSlidingWindow(BaseModel):
+    pass
+
+
+
+
+
+
+# transactions: list[dict] = []
+# Algo {hash mechant&valor: numero de operações} maybe?
+
+

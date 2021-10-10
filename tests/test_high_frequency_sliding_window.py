@@ -1,6 +1,6 @@
 import pendulum
 
-from sliding_window import HighFrequencySlidingWindow
+from sliding_windows import HighFrequencySlidingWindow
 
 
 def test_one_successful_transaction():
