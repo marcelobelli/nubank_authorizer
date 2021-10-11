@@ -224,3 +224,23 @@ def test_high_frequency_small_interval():
     ]
 
     assert authorize.authorize(input) == expected_output
+
+
+def test_doubled_transaction_rule():
+    input = [
+        {"account": {"active-card": True, "available-limit": 100}},
+        {"transaction": {"merchant": "Burger King", "amount": 20, "time": "2019-02-13T11:00:00.000Z"}},
+        {"transaction": {"merchant": "McDonald's", "amount": 10, "time": "2019-02-13T11:00:01.000Z"}},
+        {"transaction": {"merchant": "Burger King", "amount": 20, "time": "2019-02-13T11:00:02.000Z"}},
+        {"transaction": {"merchant": "Burger King", "amount": 15, "time": "2019-02-13T11:00:03.000Z"}},
+    ]
+    expected_output = [
+        {"account": {"active-card": True, "available-limit": 100}, "violations": []},
+        {"account": {"active-card": True, "available-limit": 80}, "violations": []},
+        {"account": {"active-card": True, "available-limit": 70}, "violations": []},
+        {"account": {"active-card": True, "available-limit": 70}, "violations": ["doubled-transaction"]},
+        {"account": {"active-card": True, "available-limit": 55}, "violations": []}
+    ]
+
+    assert authorize.authorize(input) == expected_output
+
