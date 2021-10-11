@@ -239,8 +239,41 @@ def test_doubled_transaction_rule():
         {"account": {"active-card": True, "available-limit": 80}, "violations": []},
         {"account": {"active-card": True, "available-limit": 70}, "violations": []},
         {"account": {"active-card": True, "available-limit": 70}, "violations": ["doubled-transaction"]},
-        {"account": {"active-card": True, "available-limit": 55}, "violations": []}
+        {"account": {"active-card": True, "available-limit": 55}, "violations": []},
     ]
 
     assert authorize.authorize(input) == expected_output
 
+
+def test_multiple_violations():
+    input = [
+        {"account": {"active-card": True, "available-limit": 100}},
+        {"transaction": {"merchant": "McDonald's", "amount": 10, "time": "2019-02-13T11:00:01.000Z"}},
+        {"transaction": {"merchant": "Burger King", "amount": 20, "time": "2019-02-13T11:00:02.000Z"}},
+        {"transaction": {"merchant": "Burger King", "amount": 5, "time": "2019-02-13T11:00:07.000Z"}},
+        {"transaction": {"merchant": "Burger King", "amount": 5, "time": "2019-02-13T11:00:08.000Z"}},
+        {"transaction": {"merchant": "Burger King", "amount": 150, "time": "2019-02-13T11:00:18.000Z"}},
+        {"transaction": {"merchant": "Burger King", "amount": 190, "time": "2019-02-13T11:00:22.000Z"}},
+        {"transaction": {"merchant": "Burger King", "amount": 15, "time": "2019-02-13T12:00:27.000Z"}},
+    ]
+    expected_output = [
+        {"account": {"active-card": True, "available-limit": 100}, "violations": []},
+        {"account": {"active-card": True, "available-limit": 90}, "violations": []},
+        {"account": {"active-card": True, "available-limit": 70}, "violations": []},
+        {"account": {"active-card": True, "available-limit": 65}, "violations": []},
+        {
+            "account": {"active-card": True, "available-limit": 65},
+            "violations": ["high-frequency-small-interval", "doubled-transaction"],
+        },
+        {
+            "account": {"active-card": True, "available-limit": 65},
+            "violations": ["insufficient-limit", "high-frequency-small-interval"],
+        },
+        {
+            "account": {"active-card": True, "available-limit": 65},
+            "violations": ["insufficient-limit", "high-frequency-small-interval"],
+        },
+        {"account": {"active-card": True, "available-limit": 50}, "violations": []},
+    ]
+
+    assert authorize.authorize(input) == expected_output

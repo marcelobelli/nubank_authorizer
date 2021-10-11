@@ -4,10 +4,14 @@ import pendulum
 from pydantic import BaseModel
 from copy import deepcopy
 
+
 class HighFrequencyTransactionProcessor(BaseModel):
     transactions: list[dict] = []
     time_window_in_secs: int = 120
     max_transactions_permitted: int = 3
+
+    def reset(self):
+        self.transactions = []
 
     @property
     def first_transaction_dt(self):
@@ -50,6 +54,10 @@ class RepeatedTransactionProcessor(BaseModel):
     time_window_in_secs: int = 120
     max_transactions_permitted: int = 1
 
+    def reset(self):
+        self.transactions = []
+        self.transactions_counter = defaultdict(int)
+
     @property
     def first_transaction_dt(self):
         return pendulum.parse(self.transactions[0]["time"])
@@ -86,3 +94,6 @@ class RepeatedTransactionProcessor(BaseModel):
         self.transactions_counter[transaction_key] += 1
         self.transactions.append(transaction)
 
+
+high_frequency = HighFrequencyTransactionProcessor()
+doubled_transaction = RepeatedTransactionProcessor()
