@@ -46,7 +46,10 @@ def test_account_already_initialized_rule():
     ]
     expected_output = [
         {"account": {"active-card": True, "available-limit": 175}, "violations": []},
-        {"account": {"active-card": True, "available-limit": 350}, "violations": ["account-already-initialized"]},
+        {
+            "account": {"active-card": True, "available-limit": 350},
+            "violations": ["account-already-initialized"],
+        },
     ]
 
     assert authorize.authorize(input) == expected_output
@@ -80,7 +83,10 @@ def test_insufficient_limit_rule():
     expected_output = [
         {"account": {"active-card": True, "available-limit": 20}, "violations": []},
         {"account": {"active-card": True, "available-limit": 10}, "violations": []},
-        {"account": {"active-card": True, "available-limit": 10}, "violations": ["insufficient-limit"]},
+        {
+            "account": {"active-card": True, "available-limit": 10},
+            "violations": ["insufficient-limit"],
+        },
         {"account": {"active-card": True, "available-limit": 5}, "violations": []},
     ]
 
@@ -149,9 +155,18 @@ def test_card_not_active_rule():
     ]
     expected_output = [
         {"account": {"active-card": False, "available-limit": 20}, "violations": []},
-        {"account": {"active-card": False, "available-limit": 20}, "violations": ["card-not-active"]},
-        {"account": {"active-card": False, "available-limit": 20}, "violations": ["card-not-active"]},
-        {"account": {"active-card": False, "available-limit": 20}, "violations": ["card-not-active"]},
+        {
+            "account": {"active-card": False, "available-limit": 20},
+            "violations": ["card-not-active"],
+        },
+        {
+            "account": {"active-card": False, "available-limit": 20},
+            "violations": ["card-not-active"],
+        },
+        {
+            "account": {"active-card": False, "available-limit": 20},
+            "violations": ["card-not-active"],
+        },
     ]
 
     assert authorize.authorize(input) == expected_output
@@ -160,18 +175,51 @@ def test_card_not_active_rule():
 def test_high_frequency_small_interval():
     input = [
         {"account": {"active-card": True, "available-limit": 100}},
-        {"transaction": {"merchant": "Burger King", "amount": 20, "time": "2019-02-13T11:00:00.000Z"}},
-        {"transaction": {"merchant": "Habbib's", "amount": 20, "time": "2019-02-13T11:00:01.000Z"}},
-        {"transaction": {"merchant": "McDonald's", "amount": 20, "time": "2019-02-13T11:01:01.000Z"}},
-        {"transaction": {"merchant": "Subway", "amount": 20, "time": "2019-02-13T11:01:31.000Z"}},
-        {"transaction": {"merchant": "Burger King", "amount": 10, "time": "2019-02-13T12:00:00.000Z"}},
+        {
+            "transaction": {
+                "merchant": "Burger King",
+                "amount": 20,
+                "time": "2019-02-13T11:00:00.000Z",
+            }
+        },
+        {
+            "transaction": {
+                "merchant": "Habbib's",
+                "amount": 20,
+                "time": "2019-02-13T11:00:01.000Z",
+            }
+        },
+        {
+            "transaction": {
+                "merchant": "McDonald's",
+                "amount": 20,
+                "time": "2019-02-13T11:01:01.000Z",
+            }
+        },
+        {
+            "transaction": {
+                "merchant": "Subway",
+                "amount": 20,
+                "time": "2019-02-13T11:01:31.000Z",
+            }
+        },
+        {
+            "transaction": {
+                "merchant": "Burger King",
+                "amount": 10,
+                "time": "2019-02-13T12:00:00.000Z",
+            }
+        },
     ]
     expected_output = [
         {"account": {"active-card": True, "available-limit": 100}, "violations": []},
         {"account": {"active-card": True, "available-limit": 80}, "violations": []},
         {"account": {"active-card": True, "available-limit": 60}, "violations": []},
         {"account": {"active-card": True, "available-limit": 40}, "violations": []},
-        {"account": {"active-card": True, "available-limit": 40}, "violations": ["high-frequency-small-interval"]},
+        {
+            "account": {"active-card": True, "available-limit": 40},
+            "violations": ["high-frequency-small-interval"],
+        },
         {"account": {"active-card": True, "available-limit": 30}, "violations": []},
     ]
 
