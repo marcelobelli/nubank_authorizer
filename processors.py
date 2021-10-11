@@ -17,7 +17,7 @@ class HighFrequencyTransactionProcessor(BaseModel):
     def successful_transactions(self):
         return len(self.transactions)
 
-    def process_high_frequency_small_interval_rule(self, transaction):
+    def process_transaction(self, transaction):
         next_transaction_dt = pendulum.parse(transaction["time"])
 
         if not self.transactions:

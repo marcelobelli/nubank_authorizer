@@ -34,7 +34,7 @@ def authorize(data):
                     if doubled_transaction.process_transaction(transaction_data) is False:
                         output.append(_generate_single_output(account, ["doubled-transaction"]))
                     else:
-                        if high_frequency.process_high_frequency_small_interval_rule(transaction_data) is True:
+                        if high_frequency.process_transaction(transaction_data) is True:
                             account["available-limit"] -= transaction_data["amount"]
                             output.append(_generate_single_output(account, []))
                         else:
