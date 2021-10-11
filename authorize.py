@@ -1,7 +1,16 @@
 import json
-
 from copy import deepcopy
-from processors import high_frequency, doubled_transaction
+
+from processors.account_processors import process_account_already_initialized
+from processors.transaction_processors import (
+    high_frequency,
+    doubled_transaction,
+    process_account_not_initialized,
+    process_card_active,
+    process_doubled_transaction,
+    process_high_frequency_transaction,
+    process_insuficient_limit,
+)
 
 
 def input_operation(line):
@@ -10,54 +19,6 @@ def input_operation(line):
 
 def _generate_single_output(account, violations):
     return {"account": deepcopy(account), "violations": violations}
-
-
-def process_high_frequency_transaction(transaction, violations):
-    violations = deepcopy(violations)
-    if high_frequency.process_transaction(transaction) is True:
-        return violations
-    violations.append("high-frequency-small-interval")
-    return violations
-
-
-def process_doubled_transaction(transaction, violations):
-    violations = deepcopy(violations)
-    if doubled_transaction.process_transaction(transaction) is True:
-        return violations
-    violations.append("doubled-transaction")
-    return violations
-
-
-def process_insuficient_limit(account, transaction, violations):
-    violations = deepcopy(violations)
-    if transaction["amount"] <= account["available-limit"]:
-        return violations
-    violations.append("insufficient-limit")
-    return violations
-
-
-def process_card_active(account, violations):
-    violations = deepcopy(violations)
-    if account["active-card"] is True:
-        return violations
-    violations.append("card-not-active")
-    return violations
-
-
-def process_account_not_initialized(account, violations):
-    violations = deepcopy(violations)
-    if account:
-        return violations
-    violations.append("account-not-initialized")
-    return violations
-
-
-def process_account_already_initialized(account, violations):
-    violations = deepcopy(violations)
-    if not account:
-        return violations
-    violations.append("account-already-initialized")
-    return violations
 
 
 def authorize(data):

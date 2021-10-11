@@ -97,3 +97,43 @@ class RepeatedTransactionProcessor(BaseModel):
 
 high_frequency = HighFrequencyTransactionProcessor()
 doubled_transaction = RepeatedTransactionProcessor()
+
+
+def process_high_frequency_transaction(transaction, violations):
+    violations = deepcopy(violations)
+    if high_frequency.process_transaction(transaction) is True:
+        return violations
+    violations.append("high-frequency-small-interval")
+    return violations
+
+
+def process_doubled_transaction(transaction, violations):
+    violations = deepcopy(violations)
+    if doubled_transaction.process_transaction(transaction) is True:
+        return violations
+    violations.append("doubled-transaction")
+    return violations
+
+
+def process_insuficient_limit(account, transaction, violations):
+    violations = deepcopy(violations)
+    if transaction["amount"] <= account["available-limit"]:
+        return violations
+    violations.append("insufficient-limit")
+    return violations
+
+
+def process_card_active(account, violations):
+    violations = deepcopy(violations)
+    if account["active-card"] is True:
+        return violations
+    violations.append("card-not-active")
+    return violations
+
+
+def process_account_not_initialized(account, violations):
+    violations = deepcopy(violations)
+    if account:
+        return violations
+    violations.append("account-not-initialized")
+    return violations

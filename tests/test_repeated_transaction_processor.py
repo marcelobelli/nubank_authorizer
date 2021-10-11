@@ -1,7 +1,7 @@
 import pendulum
 import pytest
 
-from processors import RepeatedTransactionProcessor
+from processors.transaction_processors import RepeatedTransactionProcessor
 
 
 def test_one_successful_transaction_then_add_to_processor():
