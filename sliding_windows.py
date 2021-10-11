@@ -1,3 +1,5 @@
+from collections import defaultdict
+
 import pendulum
 from pydantic import BaseModel
 
@@ -38,16 +40,47 @@ class HighFrequencySlidingWindow(BaseModel):
         return True
 
 
+class RepeatedTransactionSlidingWindow(BaseModel):
+    transactions: list[dict] = []
+    transactions_counter: dict = defaultdict(int)
+    time_window_in_secs: int = 120
+    max_transactions_permitted: int = 1
 
-class DoubleTransactionSlidingWindow(BaseModel):
-    pass
+    @property
+    def first_transaction_dt(self):
+        return pendulum.parse(self.transactions[0]["time"])
 
+    def process_transaction(self, transaction):
+        transaction_dt = pendulum.parse(transaction["time"])
+        transaction_key = f"{transaction['merchant']}-{transaction['amount']}"
+        if not self.transactions and self.transactions_counter:
+            self.transactions_counter[transaction_key] += 1
+            self.transactions.append(transaction)
 
+            return True
 
+        for _ in range(len(self.transactions)):
+            time_window_diff = transaction_dt.float_timestamp - self.first_transaction_dt.float_timestamp
+            transaction_counter = self.transactions_counter.get(transaction_key, 0)
 
+            if time_window_diff < self.time_window_in_secs and transaction_counter == self.max_transactions_permitted:
+                return False
 
+            if time_window_diff < self.time_window_in_secs and transaction_counter < self.max_transactions_permitted:
+                self.transactions_counter[transaction_key] += 1
+                self.transactions.append(transaction)
 
-# transactions: list[dict] = []
-# Algo {hash mechant&valor: numero de operações} maybe?
+                return True
 
+            transaction_key_to_delete = f"{self.transactions[0]['merchant']}-{self.transactions[0]['amount']}"
+            transaction_counter_to_delete = self.transactions_counter.get(transaction_key_to_delete)
+            if transaction_counter_to_delete <= 1:
+                del self.transactions_counter[transaction_key_to_delete]
+            else:
+                self.transactions_counter[transaction_key_to_delete] -= 1
+            del self.transactions[0]
 
+        self.transactions_counter[transaction_key] += 1
+        self.transactions.append(transaction)
+
+        return True
