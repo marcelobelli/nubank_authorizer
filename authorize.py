@@ -1,7 +1,7 @@
 import json
 
 from copy import deepcopy
-from sliding_windows import HighFrequencySlidingWindow, RepeatedTransactionSlidingWindow
+from processors import HighFrequencyTransactionProcessor, RepeatedTransactionProcessor
 
 
 def input_operation(line):
@@ -13,8 +13,8 @@ def _generate_single_output(account, violations):
 
 
 def authorize(data):
-    high_frequency = HighFrequencySlidingWindow()
-    doubled_transaction = RepeatedTransactionSlidingWindow()
+    high_frequency = HighFrequencyTransactionProcessor()
+    doubled_transaction = RepeatedTransactionProcessor()
     account = {}
     output = []
     for line in data:

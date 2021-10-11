@@ -4,7 +4,7 @@ import pendulum
 from pydantic import BaseModel
 
 
-class HighFrequencySlidingWindow(BaseModel):
+class HighFrequencyTransactionProcessor(BaseModel):
     transactions: list[dict] = []
     time_window_in_secs: int = 120
     max_transactions_permitted: int = 3
@@ -43,7 +43,7 @@ class HighFrequencySlidingWindow(BaseModel):
         return True
 
 
-class RepeatedTransactionSlidingWindow(BaseModel):
+class RepeatedTransactionProcessor(BaseModel):
     transactions: list[dict] = []
     transactions_counter: dict = defaultdict(int)
     time_window_in_secs: int = 120
