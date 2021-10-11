@@ -25,9 +25,15 @@ class HighFrequencySlidingWindow(BaseModel):
             return True
 
         for _ in range(len(self.transactions)):
-            time_window_diff = next_transaction_dt.float_timestamp - self.first_transaction_dt.float_timestamp
+            time_window_diff = (
+                next_transaction_dt.float_timestamp
+                - self.first_transaction_dt.float_timestamp
+            )
 
-            if time_window_diff < self.time_window_in_secs and self.successful_transactions == self.max_transactions_permitted:
+            if (
+                time_window_diff < self.time_window_in_secs
+                and self.successful_transactions == self.max_transactions_permitted
+            ):
                 return False
 
             if time_window_diff < self.time_window_in_secs:
@@ -60,20 +66,33 @@ class RepeatedTransactionSlidingWindow(BaseModel):
             return True
 
         for _ in range(len(self.transactions)):
-            time_window_diff = transaction_dt.float_timestamp - self.first_transaction_dt.float_timestamp
+            time_window_diff = (
+                transaction_dt.float_timestamp
+                - self.first_transaction_dt.float_timestamp
+            )
             transaction_counter = self.transactions_counter.get(transaction_key, 0)
 
-            if time_window_diff < self.time_window_in_secs and transaction_counter == self.max_transactions_permitted:
+            if (
+                time_window_diff < self.time_window_in_secs
+                and transaction_counter == self.max_transactions_permitted
+            ):
                 return False
 
-            if time_window_diff < self.time_window_in_secs and transaction_counter < self.max_transactions_permitted:
+            if (
+                time_window_diff < self.time_window_in_secs
+                and transaction_counter < self.max_transactions_permitted
+            ):
                 self.transactions_counter[transaction_key] += 1
                 self.transactions.append(transaction)
 
                 return True
 
-            transaction_key_to_delete = f"{self.transactions[0]['merchant']}-{self.transactions[0]['amount']}"
-            transaction_counter_to_delete = self.transactions_counter.get(transaction_key_to_delete)
+            transaction_key_to_delete = (
+                f"{self.transactions[0]['merchant']}-{self.transactions[0]['amount']}"
+            )
+            transaction_counter_to_delete = self.transactions_counter.get(
+                transaction_key_to_delete
+            )
             if transaction_counter_to_delete <= 1:
                 del self.transactions_counter[transaction_key_to_delete]
             else:
