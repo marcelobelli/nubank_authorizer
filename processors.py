@@ -58,9 +58,6 @@ class RepeatedTransactionProcessor(BaseModel):
         transaction_dt = pendulum.parse(transaction["time"])
         transaction_key = f"{transaction['merchant']}-{transaction['amount']}"
         if not self.transactions and self.transactions_counter:
-            self.transactions_counter[transaction_key] += 1
-            self.transactions.append(transaction)
-
             return True
 
         for _ in range(len(self.transactions)):
@@ -71,9 +68,6 @@ class RepeatedTransactionProcessor(BaseModel):
                 return False
 
             if time_window_diff < self.time_window_in_secs and transaction_counter < self.max_transactions_permitted:
-                self.transactions_counter[transaction_key] += 1
-                self.transactions.append(transaction)
-
                 return True
 
             transaction_key_to_delete = f"{self.transactions[0]['merchant']}-{self.transactions[0]['amount']}"
@@ -84,7 +78,11 @@ class RepeatedTransactionProcessor(BaseModel):
                 self.transactions_counter[transaction_key_to_delete] -= 1
             del self.transactions[0]
 
+        return True
+
+    def add_transaction(self, transaction):
+        transaction = deepcopy(transaction)
+        transaction_key = f"{transaction['merchant']}-{transaction['amount']}"
         self.transactions_counter[transaction_key] += 1
         self.transactions.append(transaction)
 
-        return True

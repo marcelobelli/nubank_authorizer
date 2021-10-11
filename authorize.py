@@ -37,6 +37,7 @@ def authorize(data):
                         if high_frequency.process_transaction(transaction_data) is True:
                             account["available-limit"] -= transaction_data["amount"]
                             high_frequency.add_transaction(transaction_data)
+                            doubled_transaction.add_transaction(transaction_data)
                             output.append(_generate_single_output(account, []))
                         else:
                             output.append(_generate_single_output(account, ["high-frequency-small-interval"]))
