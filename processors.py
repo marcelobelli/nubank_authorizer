@@ -2,7 +2,7 @@ from collections import defaultdict
 
 import pendulum
 from pydantic import BaseModel
-
+from copy import deepcopy
 
 class HighFrequencyTransactionProcessor(BaseModel):
     transactions: list[dict] = []
@@ -21,7 +21,6 @@ class HighFrequencyTransactionProcessor(BaseModel):
         next_transaction_dt = pendulum.parse(transaction["time"])
 
         if not self.transactions:
-            self.transactions.append(transaction)
             return True
 
         for _ in range(len(self.transactions)):
@@ -34,13 +33,15 @@ class HighFrequencyTransactionProcessor(BaseModel):
                 return False
 
             if time_window_diff < self.time_window_in_secs:
-                self.transactions.append(transaction)
                 return True
 
             del self.transactions[0]
 
-        self.transactions.append(transaction)
         return True
+
+    def add_transaction(self, transaction):
+        transaction = deepcopy(transaction)
+        self.transactions.append(transaction)
 
 
 class RepeatedTransactionProcessor(BaseModel):

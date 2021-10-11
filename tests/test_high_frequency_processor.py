@@ -1,9 +1,10 @@
 import pendulum
+import pytest
 
 from processors import HighFrequencyTransactionProcessor
 
 
-def test_one_successful_transaction():
+def test_one_successful_transaction_then_add_to_processor():
     processor = HighFrequencyTransactionProcessor()
     transaction = {
         "transaction": {
@@ -16,13 +17,22 @@ def test_one_successful_transaction():
     response = processor.process_transaction(transaction["transaction"])
 
     assert response is True
+
+    with pytest.raises(IndexError):
+        processor.first_transaction_dt
+
+    assert processor.successful_transactions == 0
+    assert len(processor.transactions) == 0
+
+    processor.add_transaction(transaction["transaction"])
+
     assert processor.first_transaction_dt == pendulum.parse("2019-02-13T11:00:00.000Z")
     assert processor.successful_transactions == 1
     assert len(processor.transactions) == 1
     assert processor.transactions[0] == transaction["transaction"]
 
 
-def test_two_successful_transactions_in_less_than_time_window():
+def test_two_successful_transactions_inside_time_window():
     processor = HighFrequencyTransactionProcessor()
     first_transaction = {
         "transaction": {
@@ -40,10 +50,13 @@ def test_two_successful_transactions_in_less_than_time_window():
     }
 
     first_response = processor.process_transaction(first_transaction["transaction"])
-    second_response = processor.process_transaction(second_transaction["transaction"])
-
     assert first_response is True
+    processor.add_transaction(first_transaction["transaction"])
+
+    second_response = processor.process_transaction(second_transaction["transaction"])
     assert second_response is True
+    processor.add_transaction(second_transaction["transaction"])
+
     assert processor.first_transaction_dt == pendulum.parse("2019-02-13T11:00:00.000Z")
     assert processor.successful_transactions == 2
     assert len(processor.transactions) == 2
@@ -51,7 +64,7 @@ def test_two_successful_transactions_in_less_than_time_window():
     assert processor.transactions[1] == second_transaction["transaction"]
 
 
-def test_two_successful_transactions_in_more_than_time_window():
+def test_two_successful_transactions_outside_time_window():
     processor = HighFrequencyTransactionProcessor()
     first_transaction = {
         "transaction": {
@@ -69,17 +82,20 @@ def test_two_successful_transactions_in_more_than_time_window():
     }
 
     first_response = processor.process_transaction(first_transaction["transaction"])
-    second_response = processor.process_transaction(second_transaction["transaction"])
-
     assert first_response is True
+    processor.add_transaction(first_transaction["transaction"])
+
+    second_response = processor.process_transaction(second_transaction["transaction"])
     assert second_response is True
+    processor.add_transaction(second_transaction["transaction"])
+
     assert processor.first_transaction_dt == pendulum.parse("2019-02-13T11:02:01.000Z")
     assert processor.successful_transactions == 1
     assert len(processor.transactions) == 1
     assert processor.transactions[0] == second_transaction["transaction"]
 
 
-def test_three_successful_transactions_in_less_than_time_window():
+def test_three_successful_transactions_inside_time_window():
     processor = HighFrequencyTransactionProcessor()
     first_transaction = {
         "transaction": {
@@ -104,12 +120,17 @@ def test_three_successful_transactions_in_less_than_time_window():
     }
 
     first_response = processor.process_transaction(first_transaction["transaction"])
-    second_response = processor.process_transaction(second_transaction["transaction"])
-    third_response = processor.process_transaction(third_transaction["transaction"])
-
     assert first_response is True
+    processor.add_transaction(first_transaction["transaction"])
+
+    second_response = processor.process_transaction(second_transaction["transaction"])
     assert second_response is True
+    processor.add_transaction(second_transaction["transaction"])
+
+    third_response = processor.process_transaction(third_transaction["transaction"])
     assert third_response is True
+    processor.add_transaction(third_transaction["transaction"])
+
     assert processor.first_transaction_dt == pendulum.parse("2019-02-13T11:00:00.000Z")
     assert processor.successful_transactions == 3
     assert len(processor.transactions) == 3
@@ -143,12 +164,17 @@ def test_three_successful_transactions_where_the_first_one_is_outside_time_windo
     }
 
     first_response = processor.process_transaction(first_transaction["transaction"])
-    second_response = processor.process_transaction(second_transaction["transaction"])
-    third_response = processor.process_transaction(third_transaction["transaction"])
-
     assert first_response is True
+    processor.add_transaction(first_transaction["transaction"])
+
+    second_response = processor.process_transaction(second_transaction["transaction"])
     assert second_response is True
+    processor.add_transaction(second_transaction["transaction"])
+
+    third_response = processor.process_transaction(third_transaction["transaction"])
     assert third_response is True
+    processor.add_transaction(third_transaction["transaction"])
+
     assert processor.first_transaction_dt == pendulum.parse("2019-02-13T11:02:01.000Z")
     assert processor.successful_transactions == 2
     assert len(processor.transactions) == 2
@@ -181,12 +207,17 @@ def test_three_successful_transactions_where_the_three_are_outside_time_window()
     }
 
     first_response = processor.process_transaction(first_transaction["transaction"])
-    second_response = processor.process_transaction(second_transaction["transaction"])
-    third_response = processor.process_transaction(third_transaction["transaction"])
-
     assert first_response is True
+    processor.add_transaction(first_transaction["transaction"])
+
+    second_response = processor.process_transaction(second_transaction["transaction"])
     assert second_response is True
+    processor.add_transaction(second_transaction["transaction"])
+
+    third_response = processor.process_transaction(third_transaction["transaction"])
     assert third_response is True
+    processor.add_transaction(third_transaction["transaction"])
+
     assert processor.first_transaction_dt == pendulum.parse("2019-02-13T11:10:00.000Z")
     assert processor.successful_transactions == 1
     assert len(processor.transactions) == 1
@@ -218,19 +249,24 @@ def test_three_successful_transactions_where_the_third_are_outside_time_window()
     }
 
     first_response = processor.process_transaction(first_transaction["transaction"])
-    second_response = processor.process_transaction(second_transaction["transaction"])
-    third_response = processor.process_transaction(third_transaction["transaction"])
-
     assert first_response is True
+    processor.add_transaction(first_transaction["transaction"])
+
+    second_response = processor.process_transaction(second_transaction["transaction"])
     assert second_response is True
+    processor.add_transaction(second_transaction["transaction"])
+
+    third_response = processor.process_transaction(third_transaction["transaction"])
     assert third_response is True
+    processor.add_transaction(third_transaction["transaction"])
+
     assert processor.first_transaction_dt == pendulum.parse("2019-02-13T11:10:00.000Z")
     assert processor.successful_transactions == 1
     assert len(processor.transactions) == 1
     assert processor.transactions[0] == third_transaction["transaction"]
 
 
-def test_three_successful_and_one_denied_transactions_in_less_than_time_window():
+def test_three_successful_and_one_denied_transactions_inside_time_window():
     processor = HighFrequencyTransactionProcessor()
     first_transaction = {
         "transaction": {
@@ -262,14 +298,20 @@ def test_three_successful_and_one_denied_transactions_in_less_than_time_window()
     }
 
     first_response = processor.process_transaction(first_transaction["transaction"])
-    second_response = processor.process_transaction(second_transaction["transaction"])
-    third_response = processor.process_transaction(third_transaction["transaction"])
-    fourth_response = processor.process_transaction(fourth_transaction["transaction"])
-
     assert first_response is True
+    processor.add_transaction(first_transaction["transaction"])
+
+    second_response = processor.process_transaction(second_transaction["transaction"])
     assert second_response is True
+    processor.add_transaction(second_transaction["transaction"])
+
+    third_response = processor.process_transaction(third_transaction["transaction"])
     assert third_response is True
+    processor.add_transaction(third_transaction["transaction"])
+
+    fourth_response = processor.process_transaction(fourth_transaction["transaction"])
     assert fourth_response is False
+
     assert processor.first_transaction_dt == pendulum.parse("2019-02-13T11:00:00.000Z")
     assert processor.successful_transactions == 3
     assert len(processor.transactions) == 3
@@ -278,7 +320,7 @@ def test_three_successful_and_one_denied_transactions_in_less_than_time_window()
     assert processor.transactions[2] == third_transaction["transaction"]
 
 
-def test_three_successful_and_two_denied_transactions_in_less_than_time_window():
+def test_three_successful_and_two_denied_transactions_inside_time_window():
     processor = HighFrequencyTransactionProcessor()
     first_transaction = {
         "transaction": {
@@ -317,16 +359,23 @@ def test_three_successful_and_two_denied_transactions_in_less_than_time_window()
     }
 
     first_response = processor.process_transaction(first_transaction["transaction"])
-    second_response = processor.process_transaction(second_transaction["transaction"])
-    third_response = processor.process_transaction(third_transaction["transaction"])
-    fourth_response = processor.process_transaction(fourth_transaction["transaction"])
-    fifth_response = processor.process_transaction(fifth_transaction["transaction"])
-
     assert first_response is True
+    processor.add_transaction(first_transaction["transaction"])
+
+    second_response = processor.process_transaction(second_transaction["transaction"])
     assert second_response is True
+    processor.add_transaction(second_transaction["transaction"])
+
+    third_response = processor.process_transaction(third_transaction["transaction"])
     assert third_response is True
+    processor.add_transaction(third_transaction["transaction"])
+
+    fourth_response = processor.process_transaction(fourth_transaction["transaction"])
     assert fourth_response is False
+
+    fifth_response = processor.process_transaction(fifth_transaction["transaction"])
     assert fifth_response is False
+
     assert processor.first_transaction_dt == pendulum.parse("2019-02-13T11:00:00.000Z")
     assert processor.successful_transactions == 3
     assert len(processor.transactions) == 3
@@ -335,7 +384,7 @@ def test_three_successful_and_two_denied_transactions_in_less_than_time_window()
     assert processor.transactions[2] == third_transaction["transaction"]
 
 
-def test_three_successful_and_one_denied_in_less_than_time_window_then_one_successful_after():
+def test_three_successful_and_one_denied_inside_time_window_then_one_successful_after():
     processor = HighFrequencyTransactionProcessor()
     first_transaction = {
         "transaction": {
@@ -374,16 +423,23 @@ def test_three_successful_and_one_denied_in_less_than_time_window_then_one_succe
     }
 
     first_response = processor.process_transaction(first_transaction["transaction"])
-    second_response = processor.process_transaction(second_transaction["transaction"])
-    third_response = processor.process_transaction(third_transaction["transaction"])
-    fourth_response = processor.process_transaction(fourth_transaction["transaction"])
-    fifth_response = processor.process_transaction(fifth_transaction["transaction"])
-
     assert first_response is True
+    processor.add_transaction(first_transaction["transaction"])
+
+    second_response = processor.process_transaction(second_transaction["transaction"])
     assert second_response is True
+    processor.add_transaction(second_transaction["transaction"])
+
+    third_response = processor.process_transaction(third_transaction["transaction"])
     assert third_response is True
+    processor.add_transaction(third_transaction["transaction"])
+
+    fourth_response = processor.process_transaction(fourth_transaction["transaction"])
     assert fourth_response is False
+
+    fifth_response = processor.process_transaction(fifth_transaction["transaction"])
     assert fifth_response is True
+    processor.add_transaction(fifth_transaction["transaction"])
 
     assert processor.first_transaction_dt == pendulum.parse("2019-02-13T11:00:40.000Z")
     assert processor.successful_transactions == 3
@@ -393,7 +449,7 @@ def test_three_successful_and_one_denied_in_less_than_time_window_then_one_succe
     assert processor.transactions[2] == fifth_transaction["transaction"]
 
 
-def test_three_successful_and_one_denied_in_less_than_time_window_then_one_successful_and_one_denied_after():
+def test_three_successful_and_one_denied_inside_time_window_then_one_successful_and_one_denied_after():
     processor = HighFrequencyTransactionProcessor()
     first_transaction = {
         "transaction": {
@@ -439,17 +495,25 @@ def test_three_successful_and_one_denied_in_less_than_time_window_then_one_succe
     }
 
     first_response = processor.process_transaction(first_transaction["transaction"])
-    second_response = processor.process_transaction(second_transaction["transaction"])
-    third_response = processor.process_transaction(third_transaction["transaction"])
-    fourth_response = processor.process_transaction(fourth_transaction["transaction"])
-    fifth_response = processor.process_transaction(fifth_transaction["transaction"])
-    sixth_response = processor.process_transaction(sixth_transaction["transaction"])
-
     assert first_response is True
+    processor.add_transaction(first_transaction["transaction"])
+
+    second_response = processor.process_transaction(second_transaction["transaction"])
     assert second_response is True
+    processor.add_transaction(second_transaction["transaction"])
+
+    third_response = processor.process_transaction(third_transaction["transaction"])
     assert third_response is True
+    processor.add_transaction(third_transaction["transaction"])
+
+    fourth_response = processor.process_transaction(fourth_transaction["transaction"])
     assert fourth_response is False
+
+    fifth_response = processor.process_transaction(fifth_transaction["transaction"])
     assert fifth_response is True
+    processor.add_transaction(fifth_transaction["transaction"])
+
+    sixth_response = processor.process_transaction(sixth_transaction["transaction"])
     assert sixth_response is False
 
     assert processor.first_transaction_dt == pendulum.parse("2019-02-13T11:00:40.000Z")
@@ -460,7 +524,7 @@ def test_three_successful_and_one_denied_in_less_than_time_window_then_one_succe
     assert processor.transactions[2] == fifth_transaction["transaction"]
 
 
-def test_three_successful_and_one_denied_in_less_than_time_window_then_three_successful_after():
+def test_three_successful_and_one_denied_inside_time_window_then_three_successful_after():
     processor = HighFrequencyTransactionProcessor()
     first_transaction = {
         "transaction": {
@@ -513,20 +577,31 @@ def test_three_successful_and_one_denied_in_less_than_time_window_then_three_suc
     }
 
     first_response = processor.process_transaction(first_transaction["transaction"])
-    second_response = processor.process_transaction(second_transaction["transaction"])
-    third_response = processor.process_transaction(third_transaction["transaction"])
-    fourth_response = processor.process_transaction(fourth_transaction["transaction"])
-    fifth_response = processor.process_transaction(fifth_transaction["transaction"])
-    sixth_response = processor.process_transaction(sixth_transaction["transaction"])
-    seventh_response = processor.process_transaction(seventh_transaction["transaction"])
-
     assert first_response is True
+    processor.add_transaction(first_transaction["transaction"])
+
+    second_response = processor.process_transaction(second_transaction["transaction"])
     assert second_response is True
+    processor.add_transaction(second_transaction["transaction"])
+
+    third_response = processor.process_transaction(third_transaction["transaction"])
     assert third_response is True
+    processor.add_transaction(third_transaction["transaction"])
+
+    fourth_response = processor.process_transaction(fourth_transaction["transaction"])
     assert fourth_response is False
+
+    fifth_response = processor.process_transaction(fifth_transaction["transaction"])
     assert fifth_response is True
+    processor.add_transaction(fifth_transaction["transaction"])
+
+    sixth_response = processor.process_transaction(sixth_transaction["transaction"])
     assert sixth_response is True
+    processor.add_transaction(sixth_transaction["transaction"])
+
+    seventh_response = processor.process_transaction(seventh_transaction["transaction"])
     assert seventh_response is True
+    processor.add_transaction(seventh_transaction["transaction"])
 
     assert processor.first_transaction_dt == pendulum.parse("2019-02-13T11:03:02.000Z")
     assert processor.successful_transactions == 3
