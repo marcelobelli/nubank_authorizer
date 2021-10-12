@@ -25,10 +25,29 @@ class RepeatedState(BaseModel):
             del self.transactions_counter[transaction_key]
             return
         self.transactions_counter[transaction_key] -= 1
-        return
 
-    def add_transaction(self, transaction):
+    def add_transaction(self, transaction) -> None:
         transaction = deepcopy(transaction)
         transaction_key = f"{transaction['merchant']}-{transaction['amount']}"
         self.transactions_counter[transaction_key] += 1
         self.transactions.append(transaction)
+
+
+class FrequencyState(BaseModel):
+    transactions: list[dict] = []
+
+    @property
+    def first_transaction_dt(self) -> pendulum.DateTime:
+        return pendulum.parse(self.transactions[0]["time"])
+
+    @property
+    def transactions_qty(self):
+        return len(self.transactions)
+
+    def remove_first_transaction(self) -> None:
+        del self.transactions[0]
+        return
+
+    def add_transaction(self, transaction) -> None:
+        self.transactions.append(deepcopy(transaction))
+

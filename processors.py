@@ -1,6 +1,6 @@
 import pendulum
 
-from state import AccountState, RepeatedState
+from state import AccountState, RepeatedState, FrequencyState
 
 FREQUENCY_TIME_WINDOW_IN_SECS = 120
 FREQUENCY_MAX_TRANSACTIONS_PERMITTED = 3
@@ -9,17 +9,9 @@ REPEATED_TRANSACTIONS_TIME_WINDOW_IN_SECS = 120
 REPEATED_TRANSACTIONS_MAX_PERMITTED = 1
 
 
-def dt_to_float(dt: pendulum.DateTime) -> float:
-    return dt.float_timestamp
-
-
-def str_to_dt(str_dt: str) -> pendulum.DateTime:
-    return pendulum.parse(str_dt)
-
-
-def get_frequency_transaction_state(account_state: AccountState) -> tuple[AccountState, dict]:
+def get_frequency_transaction_state(account_state: AccountState) -> tuple[AccountState, FrequencyState]:
     if not account_state.processors_state.get("frequency_transaction"):
-        account_state.processors_state["frequency_transaction"] = {"successful_transactions": []}
+        account_state.processors_state["frequency_transaction"] = FrequencyState()
     return account_state, account_state.processors_state["frequency_transaction"]
 
 
@@ -27,23 +19,22 @@ def process_frequency_transaction(account_state: AccountState, transaction: dict
     account_state, state = get_frequency_transaction_state(account_state)
     next_transaction_dt = pendulum.parse(transaction["time"])
 
-    if not state["successful_transactions"]:
+    if not state.transactions:
         return account_state, True
 
-    for _ in range(len(state["successful_transactions"])):
-        time_window_diff = dt_to_float(next_transaction_dt) - dt_to_float(
-            str_to_dt(state["successful_transactions"][0]["time"]))
+    for _ in range(state.transactions_qty):
+        time_window_diff = next_transaction_dt.float_timestamp - state.first_transaction_dt.float_timestamp
 
         if (
                 time_window_diff < FREQUENCY_TIME_WINDOW_IN_SECS
-                and len(state["successful_transactions"]) == FREQUENCY_MAX_TRANSACTIONS_PERMITTED
+                and state.transactions_qty == FREQUENCY_MAX_TRANSACTIONS_PERMITTED
         ):
             return account_state, False
 
         if time_window_diff < FREQUENCY_TIME_WINDOW_IN_SECS:
             return account_state, True
 
-        del state["successful_transactions"][0]
+        state.remove_first_transaction()
 
     return account_state, True
 
