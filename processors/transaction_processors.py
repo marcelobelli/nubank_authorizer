@@ -2,13 +2,13 @@ from collections import defaultdict
 from copy import deepcopy
 
 import pendulum
-from pydantic import BaseModel
 
 
-class HighFrequencyTransactionProcessor(BaseModel):
-    transactions: list[dict] = []
-    time_window_in_secs: int = 120
-    max_transactions_permitted: int = 3
+class HighFrequencyTransactionProcessor:
+    def __init__(self):
+        self.transactions = []
+        self.time_window_in_secs = 120
+        self.max_transactions_permitted = 3
 
     def reset(self):
         self.transactions = []
@@ -48,11 +48,12 @@ class HighFrequencyTransactionProcessor(BaseModel):
         self.transactions.append(transaction)
 
 
-class RepeatedTransactionProcessor(BaseModel):
-    transactions: list[dict] = []
-    transactions_counter: dict = defaultdict(int)
-    time_window_in_secs: int = 120
-    max_transactions_permitted: int = 1
+class RepeatedTransactionProcessor:
+    def __init__(self):
+        self.transactions: list[dict] = []
+        self.transactions_counter: dict = defaultdict(int)
+        self.time_window_in_secs: int = 120
+        self.max_transactions_permitted: int = 1
 
     def reset(self):
         self.transactions = []
