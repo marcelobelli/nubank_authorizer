@@ -101,11 +101,14 @@ def str_to_dt(str_dt: str) -> pendulum.DateTime:
     return pendulum.parse(str_dt)
 
 
-def process_frequency_transaction(account_state: AccountState, transaction: dict) -> tuple[AccountState, bool]:
+def get_frequency_transaction_state(account_state: AccountState) -> tuple[AccountState, dict]:
     if not account_state.processors_state.get("frequency_transaction"):
         account_state.processors_state["frequency_transaction"] = {"successful_transactions": []}
+    return account_state, account_state.processors_state["frequency_transaction"]
 
-    state = account_state.processors_state["frequency_transaction"]
+
+def process_frequency_transaction(account_state: AccountState, transaction: dict) -> tuple[AccountState, bool]:
+    account_state, state = get_frequency_transaction_state(account_state)
     next_transaction_dt = pendulum.parse(transaction["time"])
 
     if not state["successful_transactions"]:
