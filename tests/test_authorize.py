@@ -4,12 +4,12 @@ import sys
 import authorize
 
 
-def test_input_operations(monkeypatch):
-    input = """{"account": {"active-card": true, "available-limit": 100}}
+def test_input_data_operations(monkeypatch):
+    input_data = """{"account": {"active-card": true, "available-limit": 100}}
 {"transaction": {"merchant": "Burger King", "amount": 10, "time": "2019-02-13T10:00:00.000Z"}}
 {"transaction": {"merchant": "Habbib's", "amount": 20, "time": "2019-02-13T11:00:00.000Z"}}
 {"transaction": {"merchant": "McDonald's", "amount": 30, "time": "2019-02-13T12:00:00.000Z"}}"""
-    monkeypatch.setattr("sys.stdin", io.StringIO(input))
+    monkeypatch.setattr("sys.stdin", io.StringIO(input_data))
     expected_output = [
         {"account": {"active-card": True, "available-limit": 100}},
         {
@@ -40,23 +40,23 @@ def test_input_operations(monkeypatch):
 
 
 def test_account_already_initialized_rule():
-    input = [
+    input_data = [
         {"account": {"active-card": True, "available-limit": 175}},
         {"account": {"active-card": True, "available-limit": 350}},
     ]
     expected_output = [
         {"account": {"active-card": True, "available-limit": 175}, "violations": []},
         {
-            "account": {"active-card": True, "available-limit": 350},
+            "account": {"active-card": True, "available-limit": 175},
             "violations": ["account-already-initialized"],
         },
     ]
 
-    assert authorize.authorize(input) == expected_output
+    assert authorize.authorize(input_data) == expected_output
 
 
 def test_insufficient_limit_rule():
-    input = [
+    input_data = [
         {"account": {"active-card": True, "available-limit": 20}},
         {
             "transaction": {
@@ -90,11 +90,11 @@ def test_insufficient_limit_rule():
         {"account": {"active-card": True, "available-limit": 5}, "violations": []},
     ]
 
-    assert authorize.authorize(input) == expected_output
+    assert authorize.authorize(input_data) == expected_output
 
 
 def test_account_not_initialized_rule():
-    input = [
+    input_data = [
         {
             "transaction": {
                 "merchant": "Burger King",
@@ -125,11 +125,11 @@ def test_account_not_initialized_rule():
         {"account": {"active-card": True, "available-limit": 95}, "violations": []},
     ]
 
-    assert authorize.authorize(input) == expected_output
+    assert authorize.authorize(input_data) == expected_output
 
 
 def test_card_not_active_rule():
-    input = [
+    input_data = [
         {"account": {"active-card": False, "available-limit": 20}},
         {
             "transaction": {
@@ -169,11 +169,11 @@ def test_card_not_active_rule():
         },
     ]
 
-    assert authorize.authorize(input) == expected_output
+    assert authorize.authorize(input_data) == expected_output
 
 
 def test_high_frequency_small_interval():
-    input = [
+    input_data = [
         {"account": {"active-card": True, "available-limit": 100}},
         {
             "transaction": {
@@ -223,11 +223,11 @@ def test_high_frequency_small_interval():
         {"account": {"active-card": True, "available-limit": 30}, "violations": []},
     ]
 
-    assert authorize.authorize(input) == expected_output
+    assert authorize.authorize(input_data) == expected_output
 
 
 def test_doubled_transaction_rule():
-    input = [
+    input_data = [
         {"account": {"active-card": True, "available-limit": 100}},
         {"transaction": {"merchant": "Burger King", "amount": 20, "time": "2019-02-13T11:00:00.000Z"}},
         {"transaction": {"merchant": "McDonald's", "amount": 10, "time": "2019-02-13T11:00:01.000Z"}},
@@ -242,5 +242,5 @@ def test_doubled_transaction_rule():
         {"account": {"active-card": True, "available-limit": 55}, "violations": []}
     ]
 
-    assert authorize.authorize(input) == expected_output
+    assert authorize.authorize(input_data) == expected_output
 
