@@ -47,7 +47,7 @@ def test_account_already_initialized_rule():
     expected_output = [
         {"account": {"active-card": True, "available-limit": 175}, "violations": []},
         {
-            "account": {"active-card": True, "available-limit": 350},
+            "account": {"active-card": True, "available-limit": 175},
             "violations": ["account-already-initialized"],
         },
     ]
