@@ -1,6 +1,4 @@
-import pendulum
-
-from processors import RepeatedTransactionProcessor, process_repeated_transaction
+from processors import process_repeated_transaction
 from state import AccountState
 
 
