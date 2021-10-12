@@ -44,8 +44,7 @@ class HighFrequencyTransactionProcessor:
         return True
 
     def add_transaction(self, transaction):
-        transaction = deepcopy(transaction)
-        self.transactions.append(transaction)
+        self.transactions.append(deepcopy(transaction))
 
 
 class RepeatedTransactionProcessor:
@@ -90,10 +89,9 @@ class RepeatedTransactionProcessor:
         return True
 
     def add_transaction(self, transaction):
-        transaction = deepcopy(transaction)
         transaction_key = f"{transaction['merchant']}-{transaction['amount']}"
         self.transactions_counter[transaction_key] += 1
-        self.transactions.append(transaction)
+        self.transactions.append(deepcopy(transaction))
 
 
 high_frequency = HighFrequencyTransactionProcessor()
@@ -118,7 +116,7 @@ def process_doubled_transaction(account, transaction):
     return "doubled-transaction"
 
 
-def process_insuficient_limit(account, transaction):
+def process_insufficient_limit(account, transaction):
     if not account or transaction["amount"] <= account["available-limit"]:
         return ""
     return "insufficient-limit"
@@ -133,7 +131,7 @@ def process_card_active(account, transaction):
 transaction_processors = [
     process_account_not_initialized,
     process_card_active,
-    process_insuficient_limit,
+    process_insufficient_limit,
     process_high_frequency_transaction,
     process_doubled_transaction,
 ]
