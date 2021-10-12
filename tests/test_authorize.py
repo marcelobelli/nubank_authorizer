@@ -276,6 +276,6 @@ def test_multiple_violations():
         {"account": {"active-card": True, "available-limit": 50}, "violations": []},
     ]
 
-    assert authorize.authorize(input) == expected_output
+    assert authorize.authorize(input_data) == expected_output
 
 

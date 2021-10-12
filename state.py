@@ -18,6 +18,11 @@ class AccountState(BaseModel):
         self.active_card = account["active-card"]
         self.account_initialized = True
 
+    def resolve_transaction(self, transaction):
+        self.available_limit -= transaction["amount"]
+        for state in self.processors_state.values():
+            state.add_transaction(transaction)
+
     def to_dict(self) -> dict:
         if not self.available_limit:
             return {}

@@ -30,9 +30,7 @@ def authorize(data):
                     account_state, violations = rule(account_state, transaction_data, violations)
 
                 if not violations:
-                    account_state.available_limit -= transaction_data["amount"]
-                    account_state.processors_state["frequency_transaction"].add_transaction(transaction_data)
-                    account_state.processors_state["repeated_transaction"].add_transaction(transaction_data)
+                    account_state.resolve_transaction(transaction_data)
 
                 output.append(_generate_single_output(account_state.to_dict(), violations))
 
