@@ -13,9 +13,6 @@ def _generate_single_output(account, violations):
     return {"account": deepcopy(account), "violations": violations}
 
 
-
-
-
 def authorize(data):
     account_state = AccountState()
     output = []
