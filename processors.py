@@ -4,10 +4,13 @@ import pendulum
 from pydantic import BaseModel
 from copy import deepcopy
 
-from state import AccountState
+from state import AccountState, RepeatedState
 
 FREQUENCY_TIME_WINDOW_IN_SECS = 120
 FREQUENCY_MAX_TRANSACTIONS_PERMITTED = 3
+
+REPEATED_TRANSACTIONS_TIME_WINDOW_IN_SECS = 120
+REPEATED_TRANSACTIONS_MAX_PERMITTED = 1
 
 
 class RepeatedTransactionProcessor(BaseModel):
@@ -87,5 +90,34 @@ def process_frequency_transaction(account_state: AccountState, transaction: dict
             return account_state, True
 
         del state["successful_transactions"][0]
+
+    return account_state, True
+
+
+def get_repeated_transaction_state(account_state: AccountState) -> tuple[AccountState, RepeatedState]:
+    if not account_state.processors_state.get("repeated_transaction"):
+        account_state.processors_state["repeated_transaction"] = RepeatedState()
+    return account_state, account_state.processors_state["repeated_transaction"]
+
+
+def process_repeated_transaction(account_state: AccountState, transaction: dict) -> tuple[AccountState, bool]:
+    account_state, state = get_repeated_transaction_state(account_state)
+    transaction_dt = pendulum.parse(transaction["time"])
+    transaction_key = f"{transaction['merchant']}-{transaction['amount']}"
+
+    if not state.transactions:
+        return account_state, True
+
+    for _ in range(len(state.transactions)):
+        time_window_diff = transaction_dt.float_timestamp - state.first_transaction_dt.float_timestamp
+        transaction_counter = state.transactions_counter.get(transaction_key, 0)
+
+        if time_window_diff < REPEATED_TRANSACTIONS_TIME_WINDOW_IN_SECS and transaction_counter == REPEATED_TRANSACTIONS_MAX_PERMITTED:
+            return account_state, False
+
+        if time_window_diff < REPEATED_TRANSACTIONS_TIME_WINDOW_IN_SECS and transaction_counter < REPEATED_TRANSACTIONS_MAX_PERMITTED:
+            return account_state, True
+
+        state.remove_first_transaction()
 
     return account_state, True
