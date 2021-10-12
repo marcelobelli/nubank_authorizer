@@ -10,46 +10,6 @@ FREQUENCY_TIME_WINDOW_IN_SECS = 120
 FREQUENCY_MAX_TRANSACTIONS_PERMITTED = 3
 
 
-class HighFrequencyTransactionProcessor(BaseModel):
-    transactions: list[dict] = []
-    time_window_in_secs: int = 120
-    max_transactions_permitted: int = 3
-
-    @property
-    def first_transaction_dt(self):
-        return pendulum.parse(self.transactions[0]["time"])
-
-    @property
-    def successful_transactions(self):
-        return len(self.transactions)
-
-    def process_transaction(self, transaction):
-        next_transaction_dt = pendulum.parse(transaction["time"])
-
-        if not self.transactions:
-            return True
-
-        for _ in range(len(self.transactions)):
-            time_window_diff = next_transaction_dt.float_timestamp - self.first_transaction_dt.float_timestamp
-
-            if (
-                time_window_diff < self.time_window_in_secs
-                and self.successful_transactions == self.max_transactions_permitted
-            ):
-                return False
-
-            if time_window_diff < self.time_window_in_secs:
-                return True
-
-            del self.transactions[0]
-
-        return True
-
-    def add_transaction(self, transaction):
-        transaction = deepcopy(transaction)
-        self.transactions.append(transaction)
-
-
 class RepeatedTransactionProcessor(BaseModel):
     transactions: list[dict] = []
     transactions_counter: dict = defaultdict(int)

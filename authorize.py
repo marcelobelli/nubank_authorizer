@@ -1,8 +1,8 @@
 import json
 
 from copy import deepcopy
-from processors import HighFrequencyTransactionProcessor, RepeatedTransactionProcessor
-
+from processors import RepeatedTransactionProcessor, process_frequency_transaction
+from state import AccountState
 
 def input_operation(line):
     return json.loads(line)
@@ -13,7 +13,7 @@ def _generate_single_output(account, violations):
 
 
 def authorize(data):
-    high_frequency = HighFrequencyTransactionProcessor()
+    account_state = AccountState()
     doubled_transaction = RepeatedTransactionProcessor()
     account = {}
     output = []
@@ -34,9 +34,10 @@ def authorize(data):
                     if doubled_transaction.process_transaction(transaction_data) is False:
                         output.append(_generate_single_output(account, ["doubled-transaction"]))
                     else:
-                        if high_frequency.process_transaction(transaction_data) is True:
+                        account_state, frequency_result = process_frequency_transaction(account_state, transaction_data)
+                        if frequency_result is True:
                             account["available-limit"] -= transaction_data["amount"]
-                            high_frequency.add_transaction(transaction_data)
+                            account_state.processors_state["frequency_transaction"]["successful_transactions"].append(deepcopy(transaction_data))
                             doubled_transaction.add_transaction(transaction_data)
                             output.append(_generate_single_output(account, []))
                         else:
