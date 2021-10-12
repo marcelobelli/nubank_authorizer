@@ -1,8 +1,8 @@
 from collections import defaultdict
+from copy import deepcopy
 
 import pendulum
 from pydantic import BaseModel
-from copy import deepcopy
 
 
 class HighFrequencyTransactionProcessor(BaseModel):
@@ -31,8 +31,8 @@ class HighFrequencyTransactionProcessor(BaseModel):
             time_window_diff = next_transaction_dt.float_timestamp - self.first_transaction_dt.float_timestamp
 
             if (
-                time_window_diff < self.time_window_in_secs
-                and self.successful_transactions == self.max_transactions_permitted
+                    time_window_diff < self.time_window_in_secs
+                    and self.successful_transactions == self.max_transactions_permitted
             ):
                 return False
 
@@ -99,41 +99,40 @@ high_frequency = HighFrequencyTransactionProcessor()
 doubled_transaction = RepeatedTransactionProcessor()
 
 
-def process_high_frequency_transaction(transaction, violations):
-    violations = deepcopy(violations)
-    if high_frequency.process_transaction(transaction) is True:
-        return violations
-    violations.append("high-frequency-small-interval")
-    return violations
-
-
-def process_doubled_transaction(transaction, violations):
-    violations = deepcopy(violations)
-    if doubled_transaction.process_transaction(transaction) is True:
-        return violations
-    violations.append("doubled-transaction")
-    return violations
-
-
-def process_insuficient_limit(account, transaction, violations):
-    violations = deepcopy(violations)
-    if transaction["amount"] <= account["available-limit"]:
-        return violations
-    violations.append("insufficient-limit")
-    return violations
-
-
-def process_card_active(account, violations):
-    violations = deepcopy(violations)
-    if account["active-card"] is True:
-        return violations
-    violations.append("card-not-active")
-    return violations
-
-
-def process_account_not_initialized(account, violations):
-    violations = deepcopy(violations)
+def process_account_not_initialized(account, transaction):
     if account:
-        return violations
-    violations.append("account-not-initialized")
-    return violations
+        return ""
+    return "account-not-initialized"
+
+
+def process_high_frequency_transaction(account, transaction):
+    if not account or high_frequency.process_transaction(transaction) is True:
+        return ""
+    return "high-frequency-small-interval"
+
+
+def process_doubled_transaction(account, transaction):
+    if not account or doubled_transaction.process_transaction(transaction) is True:
+        return ""
+    return "doubled-transaction"
+
+
+def process_insuficient_limit(account, transaction):
+    if not account or transaction["amount"] <= account["available-limit"]:
+        return ""
+    return "insufficient-limit"
+
+
+def process_card_active(account, transaction):
+    if not account or account["active-card"] is True:
+        return ""
+    return "card-not-active"
+
+
+transaction_processors = [
+    process_account_not_initialized,
+    process_card_active,
+    process_insuficient_limit,
+    process_high_frequency_transaction,
+    process_doubled_transaction,
+]
