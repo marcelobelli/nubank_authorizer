@@ -3,6 +3,8 @@ import sys
 
 import authorize
 
+from state import AccountState
+
 
 def test_input_data_operations(monkeypatch):
     input_data = """{"account": {"active-card": true, "available-limit": 100}}
@@ -51,8 +53,13 @@ def test_account_already_initialized_rule():
             "violations": ["account-already-initialized"],
         },
     ]
+    account_state = AccountState()
+    output = []
+    for transaction in input_data:
+        account_state, result = authorize.authorize_transaction(account_state, transaction)
+        output.append(result)
 
-    assert authorize.authorize(input_data) == expected_output
+    assert output == expected_output
 
 
 def test_insufficient_limit_rule():
@@ -90,7 +97,13 @@ def test_insufficient_limit_rule():
         {"account": {"active-card": True, "available-limit": 5}, "violations": []},
     ]
 
-    assert authorize.authorize(input_data) == expected_output
+    account_state = AccountState()
+    output = []
+    for transaction in input_data:
+        account_state, result = authorize.authorize_transaction(account_state, transaction)
+        output.append(result)
+
+    assert output == expected_output
 
 
 def test_account_not_initialized_rule():
@@ -125,7 +138,13 @@ def test_account_not_initialized_rule():
         {"account": {"active-card": True, "available-limit": 95}, "violations": []},
     ]
 
-    assert authorize.authorize(input_data) == expected_output
+    account_state = AccountState()
+    output = []
+    for transaction in input_data:
+        account_state, result = authorize.authorize_transaction(account_state, transaction)
+        output.append(result)
+
+    assert output == expected_output
 
 
 def test_card_not_active_rule():
@@ -169,7 +188,13 @@ def test_card_not_active_rule():
         },
     ]
 
-    assert authorize.authorize(input_data) == expected_output
+    account_state = AccountState()
+    output = []
+    for transaction in input_data:
+        account_state, result = authorize.authorize_transaction(account_state, transaction)
+        output.append(result)
+
+    assert output == expected_output
 
 
 def test_high_frequency_small_interval():
@@ -223,7 +248,13 @@ def test_high_frequency_small_interval():
         {"account": {"active-card": True, "available-limit": 30}, "violations": []},
     ]
 
-    assert authorize.authorize(input_data) == expected_output
+    account_state = AccountState()
+    output = []
+    for transaction in input_data:
+        account_state, result = authorize.authorize_transaction(account_state, transaction)
+        output.append(result)
+
+    assert output == expected_output
 
 
 def test_doubled_transaction_rule():
@@ -242,7 +273,13 @@ def test_doubled_transaction_rule():
         {"account": {"active-card": True, "available-limit": 55}, "violations": []}
     ]
 
-    assert authorize.authorize(input_data) == expected_output
+    account_state = AccountState()
+    output = []
+    for transaction in input_data:
+        account_state, result = authorize.authorize_transaction(account_state, transaction)
+        output.append(result)
+
+    assert output == expected_output
 
 
 def test_multiple_violations():
@@ -276,6 +313,10 @@ def test_multiple_violations():
         {"account": {"active-card": True, "available-limit": 50}, "violations": []},
     ]
 
-    assert authorize.authorize(input_data) == expected_output
+    account_state = AccountState()
+    output = []
+    for transaction in input_data:
+        account_state, result = authorize.authorize_transaction(account_state, transaction)
+        output.append(result)
 
-
+    assert output == expected_output
