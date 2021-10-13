@@ -1,8 +1,8 @@
 import json
 from copy import deepcopy
 
-from rules import transaction_rules
-from state import AccountState
+from .rules import transaction_rules
+from .state import AccountState
 
 
 def input_operation(line):

@@ -1,6 +1,6 @@
 import pendulum
 
-from state import AccountState, RepeatedState, FrequencyState
+from .state import AccountState, RepeatedState, FrequencyState
 
 FREQUENCY_TIME_WINDOW_IN_SECS = 120
 FREQUENCY_MAX_TRANSACTIONS_PERMITTED = 3

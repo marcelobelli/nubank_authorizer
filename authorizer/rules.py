@@ -1,5 +1,5 @@
-from processors import process_frequency_transaction, process_repeated_transaction
-from state import AccountState
+from authorizer.processors import process_frequency_transaction, process_repeated_transaction
+from authorizer.state import AccountState
 
 
 def high_frequency_rule(account_state: AccountState, transaction: dict, violations: list) -> tuple[AccountState, list]:

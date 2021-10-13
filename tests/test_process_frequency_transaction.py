@@ -1,5 +1,5 @@
-from processors import process_frequency_transaction
-from state import AccountState
+from authorizer.processors import process_frequency_transaction
+from authorizer.state import AccountState
 
 
 def test_one_successful_transaction_then_add_to_processor():
