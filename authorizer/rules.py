@@ -40,6 +40,14 @@ def account_initialized_rule(
     return account_state, violations
 
 
+def account_already_initialized_rule(account_state: AccountState, account_data: dict, violations: list) -> tuple[AccountState, list]:
+    if account_state.account_initialized:
+        violations.append("account-already-initialized")
+    return account_state, violations
+
+
+account_rules = [account_already_initialized_rule]
+
 transaction_rules = [
     account_initialized_rule,
     card_not_active_rule,
