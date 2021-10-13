@@ -5,8 +5,12 @@ from .rules import transaction_rules
 from .state import AccountState
 
 
-def input_operation(line):
-    return json.loads(line)
+def input_operation(transaction):
+    return json.loads(transaction)
+
+
+def output_operation(transaction):
+    return json.dumps(transaction)
 
 
 def _generate_single_output(account, violations):

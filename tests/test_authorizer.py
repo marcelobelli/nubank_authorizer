@@ -2,7 +2,6 @@ import io
 import sys
 
 from authorizer import authorizer
-
 from authorizer.state import AccountState
 
 
@@ -37,6 +36,42 @@ def test_input_data_operations(monkeypatch):
         },
     ]
     output = [authorizer.input_operation(line) for line in sys.stdin]
+
+    assert output == expected_output
+
+
+def test_output_data_operations():
+    input_data = [
+        {"account": {"active-card": True, "available-limit": 100}, "violations": []},
+        {"account": {"active-card": True, "available-limit": 90}, "violations": []},
+        {"account": {"active-card": True, "available-limit": 70}, "violations": []},
+        {"account": {"active-card": True, "available-limit": 65}, "violations": []},
+        {
+            "account": {"active-card": True, "available-limit": 65},
+            "violations": ["high-frequency-small-interval", "doubled-transaction"],
+        },
+        {
+            "account": {"active-card": True, "available-limit": 65},
+            "violations": ["insufficient-limit", "high-frequency-small-interval"],
+        },
+        {
+            "account": {"active-card": True, "available-limit": 65},
+            "violations": ["insufficient-limit", "high-frequency-small-interval"],
+        },
+        {"account": {"active-card": True, "available-limit": 50}, "violations": []},
+    ]
+    expected_output = [
+        '{"account": {"active-card": true, "available-limit": 100}, "violations": []}',
+        '{"account": {"active-card": true, "available-limit": 90}, "violations": []}',
+        '{"account": {"active-card": true, "available-limit": 70}, "violations": []}',
+        '{"account": {"active-card": true, "available-limit": 65}, "violations": []}',
+        '{"account": {"active-card": true, "available-limit": 65}, "violations": ["high-frequency-small-interval", "doubled-transaction"]}',
+        '{"account": {"active-card": true, "available-limit": 65}, "violations": ["insufficient-limit", "high-frequency-small-interval"]}',
+        '{"account": {"active-card": true, "available-limit": 65}, "violations": ["insufficient-limit", "high-frequency-small-interval"]}',
+        '{"account": {"active-card": true, "available-limit": 50}, "violations": []}',
+    ]
+
+    output = [authorizer.output_operation(transaction) for transaction in input_data]
 
     assert output == expected_output
 
